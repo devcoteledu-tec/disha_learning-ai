@@ -94,27 +94,17 @@ const App: React.FC = () => {
         });
       }
     } catch (err: any) {
-      console.error("DEBUG INFO:", err);
+      console.error("Critical Connection Error:", err);
       
-      let errorTitle = "Connection Error";
-      let errorBody = "I couldn't reach the brain. Please try again.";
-
-      if (err.message === "MISSING_API_KEY") {
-        errorTitle = "Configuration Required";
-        errorBody = "The `API_KEY` is not found in the environment. If you're on Vercel, ensure you've added it in Settings > Environment Variables and triggered a redeploy.";
-      } else if (err.message?.includes("403")) {
-        errorTitle = "Access Denied";
-        errorBody = "Your API Key doesn't have permission to use the Gemini Flash model. Check your Google AI Studio project status.";
-      } else if (err.message?.includes("400")) {
-        errorTitle = "Invalid Request";
-        errorBody = "The model rejected the message. This can happen if the API key is invalid.";
-      }
+      const displayError = err.message?.includes("API_KEY") 
+        ? "The mathematical engine is missing its credentials. Please check your environment variables."
+        : "I've encountered a connection interruption. Please refresh and try again.";
 
       setMessages(prev => [
         ...prev,
         { 
           role: Role.MODEL, 
-          content: `### 🔴 ${errorTitle}\n\n${errorBody}\n\n---\n*Technical Detail: ${err.message || "Unknown error"}*`, 
+          content: `### ⚠️ System Update\n\n${displayError}\n\n*Technical Log: ${err.message || "Unknown error detected"}*`, 
           timestamp: new Date() 
         }
       ]);
@@ -147,7 +137,7 @@ const App: React.FC = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         {view === 'welcome' && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-slide-up">
-             <a href="https://devcotel.com" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center group transition-transform hover:scale-[1.02]">
+             <div className="flex flex-col items-center group cursor-pointer transition-transform hover:scale-[1.02]">
                <div className="mb-8 bg-indigo-600 p-5 rounded-[2.5rem] shadow-2xl shadow-indigo-200 group-hover:shadow-indigo-300 transition-all">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -156,7 +146,7 @@ const App: React.FC = () => {
                <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors">
                  DEVCOTEL<span className="text-indigo-600"> MATH</span>
                </h1>
-             </a>
+             </div>
              <p className="text-slate-400 font-bold uppercase tracking-[0.6em] text-xs sm:text-sm mb-12">
                Socratic Learning Engine
              </p>
@@ -194,7 +184,7 @@ const App: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                 </button>
-                <a href="https://devcotel.com" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 group min-w-0">
+                <div className="flex items-center space-x-3 group min-w-0">
                   <div className="bg-indigo-600 p-1.5 rounded-lg shrink-0 group-hover:scale-110 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -206,7 +196,7 @@ const App: React.FC = () => {
                     </h2>
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Neural Link Established</p>
                   </div>
-                </a>
+                </div>
               </div>
               <button onClick={handleReset} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors">
                 End Session
