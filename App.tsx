@@ -16,10 +16,13 @@ const App: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [masteryProgress, setMasteryProgress] = useState(0);
+  const [diagnosticError, setDiagnosticError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
@@ -29,8 +32,8 @@ const App: React.FC = () => {
   }, [messages, isLoading, view]);
 
   useEffect(() => {
-    if (messages.length > 1) {
-      setMasteryProgress(prev => Math.min(prev + 5, 100));
+    if (messages.length > 2) {
+      setMasteryProgress(prev => Math.min(prev + 7, 100));
     }
   }, [messages]);
 
@@ -41,8 +44,9 @@ const App: React.FC = () => {
   const handleTopicSelect = (topic: string) => {
     setSelectedTopic(topic);
     setView('chat');
-    setMasteryProgress(10);
-    const greeting = `Starting our session on **${topic}**. ${INITIAL_MESSAGE}`;
+    setDiagnosticError(null);
+    setMasteryProgress(15);
+    const greeting = `Focusing on **${topic}**. ${INITIAL_MESSAGE}`;
     setMessages([{ 
       role: Role.MODEL, 
       content: greeting, 
@@ -56,6 +60,7 @@ const App: React.FC = () => {
     setSelectedTopic(null);
     setMessages([]);
     setMasteryProgress(0);
+    setDiagnosticError(null);
     mathAgent.resetChat();
   };
 
@@ -63,6 +68,7 @@ const App: React.FC = () => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    setDiagnosticError(null);
     const userMessage: Message = {
       role: Role.USER,
       content: input,
@@ -94,17 +100,16 @@ const App: React.FC = () => {
         });
       }
     } catch (err: any) {
-      console.error("Critical Connection Error:", err);
+      console.error("Critical Fault:", err);
+      setDiagnosticError(err.message || "Unexpected failure in neural link.");
       
-      const displayError = err.message?.includes("API_KEY") 
-        ? "The mathematical engine is missing its credentials. Please check your environment variables."
-        : "I've encountered a connection interruption. Please refresh and try again.";
-
+      const errorResponse = `### ⚠️ System Diagnostic\n\nI was unable to process that request. This usually indicates a configuration issue with the API service.\n\n**Error Details:**\n\`${err.message || "Unknown Connection Failure"}\`\n\n*Please ensure your environment variables are correctly synchronized.*`;
+      
       setMessages(prev => [
         ...prev,
         { 
           role: Role.MODEL, 
-          content: `### ⚠️ System Update\n\n${displayError}\n\n*Technical Log: ${err.message || "Unknown error detected"}*`, 
+          content: errorResponse, 
           timestamp: new Date() 
         }
       ]);
@@ -116,19 +121,17 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-white relative overflow-hidden text-slate-900">
       {view !== 'chat' && (
-        <div className="absolute inset-0 pointer-events-none transition-opacity duration-1000">
+        <div className="absolute inset-0 pointer-events-none">
           <canvas id="star-canvas" className="absolute inset-0 z-0"></canvas>
           <div className="math-grid absolute inset-0 z-0 opacity-40"></div>
-          <div className="glow-orb absolute z-0" style={{ top: '-10%', left: '-10%', background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%)' }}></div>
-          <div className="glow-orb absolute z-0" style={{ bottom: '-10%', right: '-10%', background: 'radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%)' }}></div>
           <StarBackground />
         </div>
       )}
 
       {view === 'chat' && (
-        <div className="fixed top-0 left-0 w-full h-1 z-[60] bg-slate-100">
+        <div className="fixed top-0 left-0 w-full h-1 z-[70] bg-slate-100">
           <div 
-            className="h-full bg-indigo-600 transition-all duration-1000 ease-out" 
+            className="h-full bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.5)] transition-all duration-1000 ease-out" 
             style={{ width: `${masteryProgress}%` }} 
           />
         </div>
@@ -137,116 +140,116 @@ const App: React.FC = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         {view === 'welcome' && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-slide-up">
-             <div className="flex flex-col items-center group cursor-pointer transition-transform hover:scale-[1.02]">
-               <div className="mb-8 bg-indigo-600 p-5 rounded-[2.5rem] shadow-2xl shadow-indigo-200 group-hover:shadow-indigo-300 transition-all">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <div className="flex flex-col items-center group transition-transform hover:scale-[1.02]">
+               <div className="mb-8 bg-indigo-600 p-6 rounded-[2.5rem] shadow-2xl shadow-indigo-200 group-hover:shadow-indigo-400 transition-all duration-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                </div>
-               <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors">
-                 DEVCOTEL<span className="text-indigo-600"> MATH</span>
+               <h1 className="text-6xl sm:text-8xl font-black tracking-tighter text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors">
+                 DEVCOTEL<span className="text-indigo-600">.</span>
                </h1>
              </div>
-             <p className="text-slate-400 font-bold uppercase tracking-[0.6em] text-xs sm:text-sm mb-12">
-               Socratic Learning Engine
+             <p className="text-slate-400 font-bold uppercase tracking-[0.8em] text-[10px] sm:text-xs mb-12">
+               Socratic Logic Engine
              </p>
              <button 
                onClick={handleStartJourney}
-               className="group relative px-10 py-5 bg-slate-900 text-white rounded-full font-black text-sm uppercase tracking-[0.3em] overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl"
+               className="group relative px-12 py-6 bg-slate-900 text-white rounded-full font-black text-xs uppercase tracking-[0.4em] overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl"
              >
-                <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                <span className="relative z-10">Begin Journey</span>
+                <div className="absolute inset-0 bg-indigo-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                <span className="relative z-10">Initialize Session</span>
              </button>
           </div>
         )}
 
         {view === 'selection' && (
-          <div className="flex-1 flex flex-col pt-20 pb-12">
-            <div className="px-6 mb-12 animate-slide-up text-center">
-               <button onClick={handleReset} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 mb-4 transition-colors">
-                 ← Back to home
+          <div className="flex-1 flex flex-col pt-24 pb-12 animate-slide-up">
+            <div className="px-6 mb-16 text-center">
+               <button onClick={handleReset} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 mb-6 transition-all">
+                 ← System Standby
                </button>
-               <h2 className="text-4xl font-black tracking-tighter text-slate-900">Choose Topic</h2>
+               <h2 className="text-5xl font-black tracking-tighter text-slate-900">Select Discipline</h2>
+               <p className="text-slate-400 mt-2 font-medium">Choose a mathematical realm to explore.</p>
             </div>
             <TopicSelector onSelect={handleTopicSelect} />
           </div>
         )}
 
         {view === 'chat' && (
-          <div className="flex flex-col h-screen bg-white">
-            <header className="bg-white border-b border-slate-100 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-50">
-              <div className="flex items-center space-x-4 min-w-0">
+          <div className="flex flex-col h-screen bg-white animate-slide-up">
+            <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 sm:px-10 py-5 flex items-center justify-between sticky top-0 z-[60]">
+              <div className="flex items-center space-x-6 min-w-0">
                 <button 
                   onClick={() => setView('selection')}
-                  className="bg-white p-2 rounded-xl border border-slate-200 hover:border-indigo-500 transition-all shrink-0"
+                  className="bg-white p-2.5 rounded-xl border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 transition-all shrink-0 shadow-sm"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                 </button>
-                <div className="flex items-center space-x-3 group min-w-0">
-                  <div className="bg-indigo-600 p-1.5 rounded-lg shrink-0 group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 truncate">
-                      Mentor Lab <span className="text-indigo-600 ml-2 group-hover:underline">// {selectedTopic}</span>
+                <div className="min-w-0">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-slate-900 truncate">
+                      Module: <span className="text-indigo-600">{selectedTopic}</span>
                     </h2>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Neural Link Established</p>
-                  </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Logic Stream Active</p>
+                    </div>
                 </div>
               </div>
-              <button onClick={handleReset} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors">
-                End Session
+              <button onClick={handleReset} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors px-4 py-2 rounded-lg border border-transparent hover:border-rose-100">
+                End Journey
               </button>
             </header>
 
-            <main className="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-12 py-10 scroll-smooth custom-scrollbar">
-              <div className="max-w-4xl mx-auto pb-24">
+            <main className="flex-1 overflow-y-auto px-4 sm:px-12 lg:px-24 py-12 scroll-smooth custom-scrollbar bg-slate-50/30">
+              <div className="max-w-4xl mx-auto pb-32">
                 {messages.map((msg, idx) => (
                   <ChatBubble key={idx} message={msg} />
                 ))}
                 {isLoading && (
-                  <div className="flex justify-start mb-8 animate-slide-up">
-                    <div className="bg-slate-50 border border-slate-100 px-6 py-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-3">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Thinking</span>
-                      <div className="flex gap-1">
-                         <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" />
-                         <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                         <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  <div className="flex justify-start mb-12 animate-slide-up">
+                    <div className="bg-white border border-slate-100 px-8 py-5 rounded-3xl rounded-tl-none shadow-sm flex items-center gap-4">
+                      <div className="flex gap-1.5">
+                         <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
+                         <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                         <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
                       </div>
+                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Processing Logic</span>
                     </div>
                   </div>
                 )}
-                <div ref={scrollRef} />
+                <div ref={scrollRef} className="h-1" />
               </div>
             </main>
 
-            <footer className="p-4 sm:p-8 border-t border-slate-50 bg-white">
-              <div className="max-w-3xl mx-auto">
+            <footer className="p-6 sm:p-10 border-t border-slate-100 bg-white/95 backdrop-blur-md">
+              <div className="max-w-4xl mx-auto">
                 <form onSubmit={handleSubmit} className="relative group">
-                  <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden focus-within:bg-white focus-within:border-indigo-400 focus-within:shadow-xl transition-all duration-300 pr-2">
+                  <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-[2rem] overflow-hidden focus-within:bg-white focus-within:border-indigo-400 focus-within:shadow-2xl focus-within:shadow-indigo-50 transition-all duration-500 pr-3">
                     <input
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder="Share your logic or ask a question..."
+                      placeholder="Enter your calculation or reasoning..."
                       disabled={isLoading}
-                      className="flex-1 bg-transparent px-6 py-5 text-slate-800 focus:outline-none placeholder-slate-400 font-medium text-base sm:text-lg"
+                      className="flex-1 bg-transparent px-8 py-6 text-slate-800 focus:outline-none placeholder-slate-400 font-medium text-lg"
                     />
                     <button
                       type="submit"
                       disabled={isLoading || !input.trim()}
-                      className="bg-indigo-600 text-white p-3.5 rounded-xl hover:bg-slate-900 disabled:opacity-20 transition-all shadow-lg"
+                      className="bg-indigo-600 text-white p-4.5 rounded-2xl hover:bg-slate-900 disabled:opacity-10 transition-all shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
                     </button>
                   </div>
                 </form>
+                <p className="text-[9px] text-center mt-6 text-slate-400 font-bold uppercase tracking-[0.3em]">
+                  Encouraging Intellectual Independence
+                </p>
               </div>
             </footer>
           </div>
