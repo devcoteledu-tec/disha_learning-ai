@@ -1,20 +1,17 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="GHBanner" src="https://thumbs.dreamstime.com/b/flat-web-infographic-e-learning-online-education-concept-style-modern-knowledge-power-perspective-future-growing-vector-46854461.jpg" />
 </div>
 
-# Run and deploy your AI Studio app
+# 
 
-This contains everything you need to run your app locally.
+This contains everything but copy it with the user permisson [krishnadevthekeettil@gmail.com].
 
-View your app in AI Studio: https://ai.studio/apps/drive/1iKM0IqOz52IpcqMZODC6Njiq09iY6Cf_
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+Prerequisites:  Node.js
+90% of the ui/ux desined by google ai studio / and the chat logic (prompt) by devcotel team_3
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Set the `GEMINI_API_KEY`  Gemini API key
 3. Run the app:
    `npm run dev`
