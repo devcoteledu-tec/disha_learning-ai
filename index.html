@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devcotel Socratic Math Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #ffffff; 
+        color: #0f172a;
+        overflow-x: hidden;
+      }
+
+      /* Subtle Light Grid Background */
+      .math-grid {
+        position: fixed;
+        inset: 0;
+        background-image: 
+          linear-gradient(to right, rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: -1;
+      }
+
+      /* Glow Effects for Light Mode */
+      .glow-orb {
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        filter: blur(80px);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      #star-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        /* Higher z-index to float over white backgrounds */
+        z-index: 100;
+      }
+
+      /* Custom Animations */
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-slide-up {
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #f8fafc; }
+      ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; border: 2px solid #f8fafc; }
+      ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react-markdown": "https://esm.sh/react-markdown@^10.1.0",
+        "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "remark-math": "https://esm.sh/remark-math@^6.0.0",
+        "rehype-katex": "https://esm.sh/rehype-katex@^7.0.1"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <canvas id="star-canvas"></canvas>
+    <div class="math-grid"></div>
+    <div class="glow-orb" style="top: -100px; left: -100px;"></div>
+    <div class="glow-orb" style="bottom: -100px; right: -100px; background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, transparent 70%);"></div>
+    <div id="root"></div>
+  </body>
+</html>
