@@ -1,16 +1,16 @@
 
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from "../constants";
-import { Message, Role } from "../types";
 
 export class MathAgentService {
-  private ai: GoogleGenAI;
   private chat: Chat | null = null;
 
-  constructor() {
-    // Check if process and process.env exist before accessing to prevent crashes
-    const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) || '';
-    this.ai = new GoogleGenAI({ apiKey });
+  private getClient() {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      throw new Error("API_KEY environment variable is missing.");
+    }
+    return new GoogleGenAI({ apiKey });
   }
 
   resetChat() {
@@ -19,28 +19,18 @@ export class MathAgentService {
 
   private initChat(topic?: string) {
     if (!this.chat) {
+      const ai = this.getClient();
       const instruction = topic 
-        ? `${SYSTEM_INSTRUCTION}\n\nCURRENT FOCUS: The student wants to work on ${topic}. Tailor your questions and hints to this area of mathematics.`
+        ? `${SYSTEM_INSTRUCTION}\n\nCURRENT FOCUS: The student wants to work on ${topic}.`
         : SYSTEM_INSTRUCTION;
 
-      this.chat = this.ai.chats.create({
-        model: 'gemini-3-pro-preview',
+      this.chat = ai.chats.create({
+        model: 'gemini-3-flash-preview',
         config: {
           systemInstruction: instruction,
           temperature: 0.7,
         },
       });
-    }
-  }
-
-  async sendMessage(text: string, topic?: string): Promise<string> {
-    this.initChat(topic);
-    try {
-      const result: GenerateContentResponse = await this.chat!.sendMessage({ message: text });
-      return result.text || "I apologize, but I couldn't generate a response. Let's try rephrasing your question.";
-    } catch (error) {
-      console.error("Gemini API Error:", error);
-      throw new Error("Failed to communicate with the Math Agent. Please check your connection.");
     }
   }
 
@@ -52,11 +42,12 @@ export class MathAgentService {
         const c = chunk as GenerateContentResponse;
         yield c.text || "";
       }
-    } catch (error) {
-      console.error("Gemini Streaming Error:", error);
+    } catch (error: any) {
+      console.error("Gemini API Error Details:", error);
       throw error;
     }
   }
 }
 
 export const mathAgent = new MathAgentService();
+
