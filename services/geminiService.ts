@@ -8,7 +8,9 @@ export class MathAgentService {
   private chat: Chat | null = null;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Check if process and process.env exist before accessing to prevent crashes
+    const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) || '';
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   resetChat() {
