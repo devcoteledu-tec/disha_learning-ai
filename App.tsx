@@ -30,7 +30,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (messages.length > 1) {
-      setMasteryProgress(prev => Math.min(prev + 10, 100));
+      setMasteryProgress(prev => Math.min(prev + 5, 100));
     }
   }, [messages]);
 
@@ -94,25 +94,27 @@ const App: React.FC = () => {
         });
       }
     } catch (err: any) {
-      console.error("Critical Chat Error:", err);
+      console.error("DEBUG INFO:", err);
       
-      // Determine the specific cause to show the user
-      let displayError = "An unknown error occurred.";
-      if (!process.env.API_KEY) {
-        displayError = "API_KEY is not detected. If you are on Vercel, ensure you have added the Environment Variable and triggered a NEW deployment.";
-      } else if (err?.message?.includes("403") || err?.message?.includes("permission")) {
-        displayError = "API Key permission error. Ensure your Gemini API Key is active and has access to 'gemini-3-flash-preview'.";
-      } else if (err?.message?.includes("401") || err?.message?.includes("invalid")) {
-        displayError = "Invalid API Key. Please double-check the key in your Vercel dashboard.";
-      } else {
-        displayError = err?.message || "Connection failed. Check your console for details.";
+      let errorTitle = "Connection Error";
+      let errorBody = "I couldn't reach the brain. Please try again.";
+
+      if (err.message === "MISSING_API_KEY") {
+        errorTitle = "Configuration Required";
+        errorBody = "The `API_KEY` is not found in the environment. If you're on Vercel, ensure you've added it in Settings > Environment Variables and triggered a redeploy.";
+      } else if (err.message?.includes("403")) {
+        errorTitle = "Access Denied";
+        errorBody = "Your API Key doesn't have permission to use the Gemini Flash model. Check your Google AI Studio project status.";
+      } else if (err.message?.includes("400")) {
+        errorTitle = "Invalid Request";
+        errorBody = "The model rejected the message. This can happen if the API key is invalid.";
       }
 
       setMessages(prev => [
         ...prev,
         { 
           role: Role.MODEL, 
-          content: `### ⚠️ System Notification\n\n${displayError}\n\n*Check the browser console (F12) for technical logs.*`, 
+          content: `### 🔴 ${errorTitle}\n\n${errorBody}\n\n---\n*Technical Detail: ${err.message || "Unknown error"}*`, 
           timestamp: new Date() 
         }
       ]);
