@@ -93,13 +93,26 @@ const App: React.FC = () => {
           return newMessages;
         });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Critical Chat Error:", err);
+      
+      // Determine the specific cause to show the user
+      let displayError = "An unknown error occurred.";
+      if (!process.env.API_KEY) {
+        displayError = "API_KEY is not detected. If you are on Vercel, ensure you have added the Environment Variable and triggered a NEW deployment.";
+      } else if (err?.message?.includes("403") || err?.message?.includes("permission")) {
+        displayError = "API Key permission error. Ensure your Gemini API Key is active and has access to 'gemini-3-flash-preview'.";
+      } else if (err?.message?.includes("401") || err?.message?.includes("invalid")) {
+        displayError = "Invalid API Key. Please double-check the key in your Vercel dashboard.";
+      } else {
+        displayError = err?.message || "Connection failed. Check your console for details.";
+      }
+
       setMessages(prev => [
         ...prev,
         { 
           role: Role.MODEL, 
-          content: "I encountered a logical paradox. Please ensure your API key is correctly configured and try again.", 
+          content: `### ⚠️ System Notification\n\n${displayError}\n\n*Check the browser console (F12) for technical logs.*`, 
           timestamp: new Date() 
         }
       ]);
@@ -110,7 +123,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white relative overflow-hidden text-slate-900">
-      {/* Immersive background only for home and selection */}
       {view !== 'chat' && (
         <div className="absolute inset-0 pointer-events-none transition-opacity duration-1000">
           <canvas id="star-canvas" className="absolute inset-0 z-0"></canvas>
@@ -121,7 +133,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Mastery Progress Bar */}
       {view === 'chat' && (
         <div className="fixed top-0 left-0 w-full h-1 z-[60] bg-slate-100">
           <div 
@@ -131,10 +142,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Main Viewport */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        
-        {/* WELCOME VIEW */}
         {view === 'welcome' && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-slide-up">
              <a href="https://devcotel.com" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center group transition-transform hover:scale-[1.02]">
@@ -160,7 +168,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* SELECTION VIEW */}
         {view === 'selection' && (
           <div className="flex-1 flex flex-col pt-20 pb-12">
             <div className="px-6 mb-12 animate-slide-up text-center">
@@ -173,7 +180,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* CHAT VIEW */}
         {view === 'chat' && (
           <div className="flex flex-col h-screen bg-white">
             <header className="bg-white border-b border-slate-100 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-50">
