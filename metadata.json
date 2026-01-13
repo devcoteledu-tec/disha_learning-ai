@@ -1,4 +1,6 @@
+
 {
-  "name": "Devcotel  Math Agentic model",
-  "description": ""
+  "name": "Devcotel Math Mentor",
+  "description": "A Socratic math tutoring agent designed for 8th-10th grade students, focusing on conceptual mastery through guided inquiry and logical scaffolding.",
+  "requestFramePermissions": []
 }
