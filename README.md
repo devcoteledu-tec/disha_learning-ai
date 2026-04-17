@@ -1,4 +1,5 @@
-Disha Learning: Revolutionizing Foundational Mathematics
+*Disha Learning: Revolutionizing Foundational Mathematics*
+
 Disha Learning is an AI-powered educational platform designed specifically for students in Grades 8, 9, and 10. By leveraging advanced Artificial Intelligence, Disha goes beyond traditional rote learning to help students master fundamental mathematical concepts through deep, line-by-line explanations and interactive problem-solving.
 
 Our mission is to provide a "Disha" (direction) to students, transforming math from a subject of memorization into a subject of logic and intuition.
